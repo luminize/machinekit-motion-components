@@ -1,0 +1,76 @@
+# the nanopb protobuf descriptors
+# needed for protobuf de/encoding in RT
+loadrt pbmsgs
+
+newring interpolator.1.traj 16384
+newring interpolator.2.traj 16384
+newring interpolator.3.traj 16384
+
+newinst interpolate interpolator.1 count=1
+newinst interpolate interpolator.2 count=1
+newinst interpolate interpolator.3 count=1
+newinst jplan jplanner
+newinst ddtv2 acc1
+newinst ddtv2 acc2
+newinst ddtv2 acc3
+newinst ddtv2 acc4
+
+newinst minmaxv2 interpolator.1.0.minmax_vel
+newinst minmaxv2 interpolator.2.0.minmax_vel
+newinst minmaxv2 interpolator.3.0.minmax_vel
+newinst minmaxv2 jplanner.0.minmax_vel
+
+newinst minmaxv2 interpolator.1.0.minmax_acc
+newinst minmaxv2 interpolator.2.0.minmax_acc
+newinst minmaxv2 interpolator.3.0.minmax_acc
+newinst minmaxv2 jplanner.0.minmax_acc
+
+setp interpolator.1.degree  1
+setp interpolator.1.jitter-correct 0
+setp interpolator.1.epsilon  0.0001
+setp interpolator.2.degree  3
+setp interpolator.2.jitter-correct 0
+setp interpolator.2.epsilon  0.0001
+setp interpolator.3.degree  5
+setp interpolator.3.jitter-correct 0
+setp interpolator.3.epsilon  0.0001
+
+net v1 interpolator.1.0.curr-vel acc1.in interpolator.1.0.minmax_vel.in
+net v2 interpolator.2.0.curr-vel acc2.in interpolator.2.0.minmax_vel.in
+net v3 interpolator.3.0.curr-vel acc3.in interpolator.3.0.minmax_vel.in
+net v4 jplanner.0.curr-vel acc4.in jplanner.0.minmax_vel.in
+
+net a1 acc1.out interpolator.1.0.minmax_acc.in
+net a2 acc2.out interpolator.2.0.minmax_acc.in
+net a3 acc3.out interpolator.3.0.minmax_acc.in
+net a4 acc4.out jplanner.0.minmax_acc.in
+
+# period of movement = 2 seconds
+setp jplanner.0.enable 1
+
+newthread servo 1000000 fp
+
+addf interpolator.1.update servo
+addf interpolator.2.update servo
+addf interpolator.3.update servo
+addf jplanner.update servo
+addf acc1.funct servo
+addf acc2.funct servo
+addf acc3.funct servo
+addf acc4.funct servo
+addf interpolator.1.0.minmax_vel.funct servo
+addf interpolator.2.0.minmax_vel.funct servo
+addf interpolator.3.0.minmax_vel.funct servo
+addf jplanner.0.minmax_vel.funct servo
+addf interpolator.1.0.minmax_acc.funct servo
+addf interpolator.2.0.minmax_acc.funct servo
+addf interpolator.3.0.minmax_acc.funct servo
+addf jplanner.0.minmax_acc.funct servo
+
+
+loadusr halscope
+
+start
+
+
+

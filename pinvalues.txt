@@ -1,0 +1,201 @@
+This is a comparison between 3 interpolator and 1 jplanner component.
+Interpolators differ in the spline degree setting, 1 linear, 3 cubic
+and 5 quintic.
+Jplanner max-acc and max-vel is calculated beforehand by the python script
+
+usage:
+
+terminal 1
+halrun -I interpolate.hal
+
+this will start the HAL configuration and loads halscope. This has been set
+up to trigger when the interpolator.1.0.traj-busy pin rises.
+
+terminal 2
+./feed-interpolator.py
+
+the python script calculates jplanner.0.max-* values by the distance and
+period (physics, x(t) = x(0) + 1/2 * a * t^2 and v(t) = v(0) + a * t) and
+sets these pins for the jplan component.
+This ensures all (interpolator* and jplanner) will have to travel the
+same distance in the same amount of time.
+
+you'll see that the scope has captured position, velocity and acceleration
+of the four components compare to your hearts delight. Picture has been
+saved as "halscope.png" and values of the samples have been saved as
+"halscope.log"
+
+Inspect the HAL pins by:
+halcmd show pin
+
+Component Pins:
+  Comp   Inst Type  Dir         Value  Name                                            Epsilon Flags  linked to:
+   156    158 s32   OUT           195  acc1.funct.time                         ----
+   156    158 s32   I/O          7096  acc1.funct.tmax                         ----
+   156    158 bit   OUT         FALSE  acc1.funct.tmax-inc                     ----
+   156    158 float IN              0  acc1.in                                 0.000010	----	      <== v1
+   156    158 float OUT             0  acc1.out                                0.000010	----	      ==> a1
+   156    165 s32   OUT           189  acc2.funct.time                         ----
+   156    165 s32   I/O          2128  acc2.funct.tmax                         ----
+   156    165 bit   OUT         FALSE  acc2.funct.tmax-inc                     ----
+   156    165 float IN              0  acc2.in                                 0.000010	----	      <== v2
+   156    165 float OUT             0  acc2.out                                0.000010	----	      ==> a2
+   156    172 s32   OUT           128  acc3.funct.time                         ----
+   156    172 s32   I/O          2766  acc3.funct.tmax                         ----
+   156    172 bit   OUT         FALSE  acc3.funct.tmax-inc                     ----
+   156    172 float IN              0  acc3.in                                 0.000010	----	      <== v3
+   156    172 float OUT             0  acc3.out                                0.000010	----	      ==> a3
+   156    179 s32   OUT           128  acc4.funct.time                         ----
+   156    179 s32   I/O          3305  acc4.funct.tmax                         ----
+   156    179 bit   OUT         FALSE  acc4.funct.tmax-inc                     ----
+   156    179 float IN              0  acc4.in                                 0.000010	----	      <== v4
+   156    179 float OUT             0  acc4.out                                0.000010	----	      ==> a4
+    83     85 float OUT             0  interpolator.1.0.curr-acc               0.000010	--l-
+    83     85 float OUT            10  interpolator.1.0.curr-pos               0.000010	--l-
+    83     85 float OUT             0  interpolator.1.0.curr-vel               0.000010	--l-	      ==> v1
+    83     85 float OUT             0  interpolator.1.0.end-acc                0.000010	--l-
+    83     85 float OUT            10  interpolator.1.0.end-pos                0.000010	--l-
+    83     85 float OUT             0  interpolator.1.0.end-vel                0.000010	--l-
+   186    224 s32   OUT           143  interpolator.1.0.minmax_acc.funct.time  ----
+   186    224 s32   I/O          4441  interpolator.1.0.minmax_acc.funct.tmax  ----
+   186    224 bit   OUT         FALSE  interpolator.1.0.minmax_acc.funct.tmax-i----
+   186    224 float IN              0  interpolator.1.0.minmax_acc.in          0.000010	----	      <== a1
+   186    224 float OUT         20000  interpolator.1.0.minmax_acc.max         0.000010	----
+   186    224 float OUT        -20000  interpolator.1.0.minmax_acc.min         0.000010	----
+   186    224 bit   IN          FALSE  interpolator.1.0.minmax_acc.reset       ----
+   186    188 s32   OUT           421  interpolator.1.0.minmax_vel.funct.time  ----
+   186    188 s32   I/O         10991  interpolator.1.0.minmax_vel.funct.tmax  ----
+   186    188 bit   OUT         FALSE  interpolator.1.0.minmax_vel.funct.tmax-i----
+   186    188 float IN              0  interpolator.1.0.minmax_vel.in          0.000010	----	      <== v1
+   186    188 float OUT            20  interpolator.1.0.minmax_vel.max         0.000010	----
+   186    188 float OUT             0  interpolator.1.0.minmax_vel.min         0.000010	----
+   186    188 bit   IN          FALSE  interpolator.1.0.minmax_vel.reset       ----
+    83     85 bit   OUT         FALSE  interpolator.1.0.traj-busy              --l-
+    83     85 u32   IN     0x00000001  interpolator.1.degree                   --l-
+    83     85 float OUT           0.5  interpolator.1.duration                 0.000010	--l-
+    83     85 float IN         0.0001  interpolator.1.epsilon                  0.000010	--l-
+    83     85 bit   IN          FALSE  interpolator.1.jitter-correct           --l-
+    83     85 float OUT        96.392  interpolator.1.progress                 0.000010	--l-
+    83     85 s32   OUT             0  interpolator.1.serial                   --l-
+    83     85 s32   OUT           741  interpolator.1.update.time              ----
+    83     85 s32   I/O         12897  interpolator.1.update.tmax              ----
+    83     85 bit   OUT         FALSE  interpolator.1.update.tmax-inc          ----
+    83    103 float OUT             0  interpolator.2.0.curr-acc               0.000010	--l-
+    83    103 float OUT            10  interpolator.2.0.curr-pos               0.000010	--l-
+    83    103 float OUT             0  interpolator.2.0.curr-vel               0.000010	--l-	      ==> v2
+    83    103 float OUT             0  interpolator.2.0.end-acc                0.000010	--l-
+    83    103 float OUT            10  interpolator.2.0.end-pos                0.000010	--l-
+    83    103 float OUT             0  interpolator.2.0.end-vel                0.000010	--l-
+   186    233 s32   OUT           149  interpolator.2.0.minmax_acc.funct.time  ----
+   186    233 s32   I/O          3468  interpolator.2.0.minmax_acc.funct.tmax  ----
+   186    233 bit   OUT         FALSE  interpolator.2.0.minmax_acc.funct.tmax-i----
+   186    233 float IN              0  interpolator.2.0.minmax_acc.in          0.000010	----	      <== a2
+   186    233 float OUT        239.52  interpolator.2.0.minmax_acc.max         0.000010	----
+   186    233 float OUT       -239.52  interpolator.2.0.minmax_acc.min         0.000010	----
+   186    233 bit   IN          FALSE  interpolator.2.0.minmax_acc.reset       ----
+   186    197 s32   OUT           163  interpolator.2.0.minmax_vel.funct.time  ----
+   186    197 s32   I/O          3256  interpolator.2.0.minmax_vel.funct.tmax  ----
+   186    197 bit   OUT         FALSE  interpolator.2.0.minmax_vel.funct.tmax-i----
+   186    197 float IN              0  interpolator.2.0.minmax_vel.in          0.000010	----	      <== v2
+   186    197 float OUT            30  interpolator.2.0.minmax_vel.max         0.000010	----
+   186    197 float OUT             0  interpolator.2.0.minmax_vel.min         0.000010	----
+   186    197 bit   IN          FALSE  interpolator.2.0.minmax_vel.reset       ----
+    83    103 bit   OUT         FALSE  interpolator.2.0.traj-busy              --l-
+    83    103 u32   IN     0x00000003  interpolator.2.degree                   --l-
+    83    103 float OUT           0.5  interpolator.2.duration                 0.000010	--l-
+    83    103 float IN         0.0001  interpolator.2.epsilon                  0.000010	--l-
+    83    103 bit   IN          FALSE  interpolator.2.jitter-correct           --l-
+    83    103 float OUT        96.392  interpolator.2.progress                 0.000010	--l-
+    83    103 s32   OUT             0  interpolator.2.serial                   --l-
+    83    103 s32   OUT           414  interpolator.2.update.time              ----
+    83    103 s32   I/O          3238  interpolator.2.update.tmax              ----
+    83    103 bit   OUT         FALSE  interpolator.2.update.tmax-inc          ----
+    83    121 float OUT             0  interpolator.3.0.curr-acc               0.000010	--l-
+    83    121 float OUT            10  interpolator.3.0.curr-pos               0.000010	--l-
+    83    121 float OUT             0  interpolator.3.0.curr-vel               0.000010	--l-	      ==> v3
+    83    121 float OUT             0  interpolator.3.0.end-acc                0.000010	--l-
+    83    121 float OUT            10  interpolator.3.0.end-pos                0.000010	--l-
+    83    121 float OUT             0  interpolator.3.0.end-vel                0.000010	--l-
+   186    242 s32   OUT           152  interpolator.3.0.minmax_acc.funct.time  ----
+   186    242 s32   I/O          3966  interpolator.3.0.minmax_acc.funct.tmax  ----
+   186    242 bit   OUT         FALSE  interpolator.3.0.minmax_acc.funct.tmax-i----
+   186    242 float IN              0  interpolator.3.0.minmax_acc.in          0.000010	----	      <== a3
+   186    242 float OUT      230.9383  interpolator.3.0.minmax_acc.max         0.000010	----
+   186    242 float OUT     -230.9383  interpolator.3.0.minmax_acc.min         0.000010	----
+   186    242 bit   IN          FALSE  interpolator.3.0.minmax_acc.reset       ----
+   186    206 s32   OUT           155  interpolator.3.0.minmax_vel.funct.time  ----
+   186    206 s32   I/O          7961  interpolator.3.0.minmax_vel.funct.tmax  ----
+   186    206 bit   OUT         FALSE  interpolator.3.0.minmax_vel.funct.tmax-i----
+   186    206 float IN              0  interpolator.3.0.minmax_vel.in          0.000010	----	      <== v3
+   186    206 float OUT          37.5  interpolator.3.0.minmax_vel.max         0.000010	----
+   186    206 float OUT             0  interpolator.3.0.minmax_vel.min         0.000010	----
+   186    206 bit   IN          FALSE  interpolator.3.0.minmax_vel.reset       ----
+    83    121 bit   OUT         FALSE  interpolator.3.0.traj-busy              --l-
+    83    121 u32   IN     0x00000005  interpolator.3.degree                   --l-
+    83    121 float OUT           0.5  interpolator.3.duration                 0.000010	--l-
+    83    121 float IN         0.0001  interpolator.3.epsilon                  0.000010	--l-
+    83    121 bit   IN          FALSE  interpolator.3.jitter-correct           --l-
+    83    121 float OUT        96.392  interpolator.3.progress                 0.000010	--l-
+    83    121 s32   OUT             0  interpolator.3.serial                   --l-
+    83    121 s32   OUT           337  interpolator.3.update.time              ----
+    83    121 s32   I/O          7878  interpolator.3.update.tmax              ----
+    83    121 bit   OUT         FALSE  interpolator.3.update.tmax-inc          ----
+   139    141 bit   OUT         FALSE  jplanner.0.active                       --l-
+   139    141 float OUT            10  jplanner.0.curr-pos                     0.000010	--l-
+   139    141 float OUT             0  jplanner.0.curr-vel                     0.000010	--l-	      ==> v4
+   139    141 bit   IN           TRUE  jplanner.0.enable                       --l-
+   139    141 float IN              0  jplanner.0.home-pos                     0.000010	--l-
+   139    141 bit   IN          FALSE  jplanner.0.home-set                     --l-
+   139    141 float IN            160  jplanner.0.max-acc                      0.000010	--l-
+   139    141 float IN             40  jplanner.0.max-vel                      0.000010	--l-
+   186    251 s32   OUT           155  jplanner.0.minmax_acc.funct.time        ----
+   186    251 s32   I/O          2674  jplanner.0.minmax_acc.funct.tmax        ----
+   186    251 bit   OUT         FALSE  jplanner.0.minmax_acc.funct.tmax-inc    ----
+   186    251 float IN              0  jplanner.0.minmax_acc.in                0.000010	----	      <== a4
+   186    251 float OUT           160  jplanner.0.minmax_acc.max               0.000010	----
+   186    251 float OUT     -159.6794  jplanner.0.minmax_acc.min               0.000010	----
+   186    251 bit   IN          FALSE  jplanner.0.minmax_acc.reset             ----
+   186    215 s32   OUT           154  jplanner.0.minmax_vel.funct.time        ----
+   186    215 s32   I/O          3666  jplanner.0.minmax_vel.funct.tmax        ----
+   186    215 bit   OUT         FALSE  jplanner.0.minmax_vel.funct.tmax-inc    ----
+   186    215 float IN              0  jplanner.0.minmax_vel.in                0.000010	----	      <== v4
+   186    215 float OUT      39.92024  jplanner.0.minmax_vel.max               0.000010	----
+   186    215 float OUT             0  jplanner.0.minmax_vel.min               0.000010	----
+   186    215 bit   IN          FALSE  jplanner.0.minmax_vel.reset             ----
+   139    141 float IN             10  jplanner.0.pos-cmd                      0.000010	--l-
+   139    141 bit   OUT         FALSE  jplanner.joints-active                  --l-
+   139    141 s32   OUT           342  jplanner.update.time                    ----
+   139    141 s32   I/O         11821  jplanner.update.tmax                    ----
+   139    141 bit   OUT         FALSE  jplanner.update.tmax-inc                ----
+   284        s32   OUT           448  scope.sample.time                       ----
+   284        s32   I/O         10474  scope.sample.tmax                       ----
+   284        bit   OUT         FALSE  scope.sample.tmax-inc                   ----
+    66        s32   OUT       1003031  servo.curr-period                       ----
+    66        s32   OUT          4545  servo.time                              ----
+    66        s32   I/O         16611  servo.tmax                              ----
+
+specifically interesting:
+
+   186    224 float OUT         20000  interpolator.1.0.minmax_acc.max         0.000010	----
+   186    224 float OUT        -20000  interpolator.1.0.minmax_acc.min         0.000010	----
+   186    188 float OUT            20  interpolator.1.0.minmax_vel.max         0.000010	----
+   186    188 float OUT             0  interpolator.1.0.minmax_vel.min         0.000010	----
+
+   186    233 float OUT        239.52  interpolator.2.0.minmax_acc.max         0.000010	----
+   186    233 float OUT       -239.52  interpolator.2.0.minmax_acc.min         0.000010	----
+   186    197 float OUT            30  interpolator.2.0.minmax_vel.max         0.000010	----
+   186    197 float OUT             0  interpolator.2.0.minmax_vel.min         0.000010	----
+
+   186    242 float OUT      230.9383  interpolator.3.0.minmax_acc.max         0.000010	----
+   186    242 float OUT     -230.9383  interpolator.3.0.minmax_acc.min         0.000010	----
+   186    206 float OUT          37.5  interpolator.3.0.minmax_vel.max         0.000010	----
+   186    206 float OUT             0  interpolator.3.0.minmax_vel.min         0.000010	----
+
+   139    141 float IN            160  jplanner.0.max-acc                      0.000010	--l-
+   139    141 float IN             40  jplanner.0.max-vel                      0.000010	--l-
+   186    215 float OUT      39.92024  jplanner.0.minmax_vel.max               0.000010	----
+   186    215 float OUT             0  jplanner.0.minmax_vel.min               0.000010	----
+   186    251 float OUT           160  jplanner.0.minmax_acc.max               0.000010	----
+   186    251 float OUT     -159.6794  jplanner.0.minmax_acc.min               0.000010	----
+
+
