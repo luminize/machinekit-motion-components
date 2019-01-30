@@ -1,33 +1,57 @@
-This is a comparison between 3 interpolator and 1 jplanner component.
+= Machinekit motion components
+
+This is a comparison between 3 `interpolator` and 1 `jplan` component.
 Interpolators differ in the spline degree setting, 1 linear, 3 cubic
 and 5 quintic.
-Jplanner max-acc and max-vel is calculated beforehand by the python script
+Jplanner `max-acc` and `max-vel` are calculated beforehand by the python script
 
-usage:
+== Usage:
 
-terminal 1
+=== HAL configuration
+
+.terminal 1
+[code,bash]
+....
 halrun -I interpolate.hal
+....
 
-this will start the HAL configuration and loads halscope. This has been set
+=== Python script
+
+This will start the HAL configuration and loads halscope. This has been set
 up to trigger when the interpolator.1.0.traj-busy pin rises.
+The Python script will execute a single move from 0 -> 10.
 
-terminal 2
+.terminal 2
+[code,bash]
+....
 ./feed-interpolator.py
+....
 
-the python script calculates jplanner.0.max-* values by the distance and
-period (physics, x(t) = x(0) + 1/2 * a * t^2 and v(t) = v(0) + a * t) and
+the python script calculates `jplanner.0.max-\*` values by the distance and
+period (physics, `x(t) = x(0) + 1/2 * a * t^2` and `v(t) = v(0) + a * t`) and
 sets these pins for the jplan component.
 This ensures all (interpolator* and jplanner) will have to travel the
 same distance in the same amount of time.
 
-you'll see that the scope has captured position, velocity and acceleration
-of the four components compare to your hearts delight. Picture has been
-saved as "halscope.png" and values of the samples have been saved as
-"halscope.log"
+== Halscope and HAL values
 
-Inspect the HAL pins by:
+You'll see that the scope has captured position, velocity and acceleration
+of the four components. Compare to your hearts delight! Picture has been
+saved as `halscope.png` and values of the samples have been saved as
+`halscope.log`.
+
+.Halscope 
+image::halscope.png[]
+
+.Inspect HAL pins
+[code,bash]
+....
 halcmd show pin
+....
 
+.HAL pin values
+[code,bash]
+....
 Component Pins:
   Comp   Inst Type  Dir         Value  Name                                            Epsilon Flags  linked to:
    156    158 s32   OUT           195  acc1.funct.time                         ----
@@ -173,9 +197,13 @@ Component Pins:
     66        s32   OUT       1003031  servo.curr-period                       ----
     66        s32   OUT          4545  servo.time                              ----
     66        s32   I/O         16611  servo.tmax                              ----
+....
 
-specifically interesting:
+The values that are specifically interesting:
 
+.Interesting values
+[code,bash]
+....
    186    224 float OUT         20000  interpolator.1.0.minmax_acc.max         0.000010	----
    186    224 float OUT        -20000  interpolator.1.0.minmax_acc.min         0.000010	----
    186    188 float OUT            20  interpolator.1.0.minmax_vel.max         0.000010	----
@@ -197,5 +225,5 @@ specifically interesting:
    186    215 float OUT             0  jplanner.0.minmax_vel.min               0.000010	----
    186    251 float OUT           160  jplanner.0.minmax_acc.max               0.000010	----
    186    251 float OUT     -159.6794  jplanner.0.minmax_acc.min               0.000010	----
-
+....
 
